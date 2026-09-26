@@ -1,0 +1,28 @@
+{
+  "name": "next-step-road-backend",
+  "version": "1.0.0",
+  "description": "Backend API for NextStep Road",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node utils/seed.js"
+  },
+  "keywords": [
+    "forms",
+    "saas",
+    "ai",
+    "gemini",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "express": "^5.2.1"
+  }
+}
