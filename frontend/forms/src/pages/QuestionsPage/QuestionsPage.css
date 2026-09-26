@@ -1,0 +1,22 @@
+.QuestionsPage {
+    background-color: #F3F2F0;
+    ;
+}
+
+.NavBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 10px 10px;
+    background-color: white;
+}
+
+.logo-nextstep {
+    color: #1E3A5F;
+    ;
+}
+
+.logo-road {
+    color: #000000;
+}

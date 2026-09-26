@@ -1,5 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage/HomePage.jsx";
+import QuestionsPage from "./pages/QuestionsPage/QuestionsPage.jsx";
+import { useState } from "react";
+
 
 function NotFound() {
   return (
@@ -15,9 +18,17 @@ function NotFound() {
 }
 
 export default function App() {
+  const [incidentType, setIncidentType] = useState(null);
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<HomePage
+            incidentType={incidentType}
+            setIncidentType={setIncidentType}
+          />} />
+      <Route
+        path="/questions"
+        element={<QuestionsPage incidentType={incidentType} />}
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

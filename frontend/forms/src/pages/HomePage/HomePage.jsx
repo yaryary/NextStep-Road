@@ -1,8 +1,47 @@
 import "./HomePage.css";
-import { Link } from "react-router-dom";
 import { assets } from "../../assets/assets.js";
+import { useNavigate } from "react-router-dom";
 
-export default function HomePage() {
+const [incidentTypes] = [
+  {
+    id: "flat-tire",
+    title: "Flat tire",
+    description: "Need roadside help or a spare tire.",
+    icon: assets.flat_tire_icon,
+  },
+  {
+    id: "minor-accident",
+    title: "Minor accident",
+    description: "Need help after a low-impact collision.",
+    icon: assets.accident_icon,
+  },
+  {
+    id: "dead-battery",
+    title: "Dead battery",
+    description: "Need a jump-start or battery assistance.",
+    icon: assets.battery_icon,
+  },
+  {
+    id: "breakdown-warning-light",
+    title: "Breakdown or warning light",
+    description: "Your vehicle stopped or a warning light came on.",
+    icon: assets.light_icon,
+  },
+  {
+    id: "vehicle-break-in-or-theft",
+    title: "Vehicle break-in or theft",
+    description: "Your vehicle was damaged, broken into, or stolen.",
+    icon: assets.theft_icon,
+  },
+];
+
+export default function HomePage({ incidentType, setIncidentType }) {
+
+  const navigate = useNavigate();
+  
+  function handleIncidentSelect(selectedType) {
+    setIncidentType(selectedType);
+  }
   return (
     <main className="Home">
       <div className="NavBar">
@@ -31,7 +70,10 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => handleIncidentSelect("flat-tire")}
-            className="incident-card"
+            aria-pressed={incidentType === "flat-tire"}
+            className={`incident-card ${
+              incidentType === "flat-tire" ? "incident-card--selected" : ""
+            }`}
           >
             <span className="incident-icon" aria-hidden="true">
               <img src={assets.flat_tire_icon} alt="" />
@@ -52,7 +94,10 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => handleIncidentSelect("minor-accident")}
-            className="incident-card"
+            aria-pressed={incidentType === "minor-accident"}
+            className={`incident-card ${
+              incidentType === "minor-accident" ? "incident-card--selected" : ""
+            }`}
           >
             <span className="incident-icon" aria-hidden="true">
               <img src={assets.accident_icon} alt="" />
@@ -73,7 +118,10 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => handleIncidentSelect("dead-battery")}
-            className="incident-card"
+            aria-pressed={incidentType === "dead-battery"}
+            className={`incident-card ${
+              incidentType === "dead-battery" ? "incident-card--selected" : ""
+            }`}
           >
             <span className="incident-icon" aria-hidden="true">
               <img src={assets.battery_icon} alt="" />
@@ -94,7 +142,12 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => handleIncidentSelect("breakdown-warning-light")}
-            className="incident-card"
+            aria-pressed={incidentType === "breakdown-warning-light"}
+            className={`incident-card ${
+              incidentType === "breakdown-warning-light"
+                ? "incident-card--selected"
+                : ""
+            }`}
           >
             <span className="incident-icon" aria-hidden="true">
               <img src={assets.light_icon} alt="" />
@@ -117,7 +170,10 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => handleIncidentSelect("vehicle-break-in-or-theft")}
-            className="incident-card"
+            aria-pressed={incidentType === "vehicle-break-in-or-theft"}
+            className={`incident-card ${
+              incidentType === "vehicle-break-in-or-theft" ? "incident-card--selected" : ""
+            }`}
           >
             <span className="incident-icon" aria-hidden="true">
               <img src={assets.theft_icon} alt="" />
@@ -157,14 +213,22 @@ export default function HomePage() {
         </div>
 
         <div className="plan-navigation">
-          <button type="button" className="start-over-button">
+          <button type="button" className="start-over-button"
+          onClick={() => {
+            setIncidentType(null);
+          }}>
             <span aria-hidden="true">‹</span>
             Start over
           </button>
 
           <p className="step-count">Step 1 of 3</p>
 
-          <button type="button" className="continue-button" disabled>
+          <button
+            type="button"
+            className="continue-button"
+            disabled={!incidentType}
+            onClick={() => navigate("/questions")}
+          >
             Continue
           </button>
         </div>

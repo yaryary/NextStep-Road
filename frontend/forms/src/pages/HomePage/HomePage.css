@@ -108,6 +108,11 @@
     outline-offset: 3px;
 }
 
+.incident-card--selected {
+  border: 2px solid #24456f;
+  background-color: #eef4fb;
+}
+
 .incident-card-content {
     flex: 1;
 }
