@@ -28,6 +28,6 @@ export function errorHandler(err, _req, res, _next) {
     res.status(error.statusCode || 500).json({
         success: false,
         message: error.message,
-        ...ApiError(error.details ? { details: error.details} : {}),
+        ...(error.details ? { details: error.details } : {}),
     });
 }

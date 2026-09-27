@@ -7,24 +7,28 @@ import incidentPlanRoutes from "./routes/incidentPlan.routes.js";
 const app = express();
 
 app.use(
-    cors({
-        origin(origin, callback) {
-            if (!origin || env.clientUrls.includes(origin)) return callback(null, true);
-            return callback(new Error(`Origin ${origin} not allowed by CORS`));
-        },
-        credentials: true,
-    })
+  cors({
+    origin(origin, callback) {
+      if (!origin || env.clientUrls.includes(origin))
+        return callback(null, true);
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
+  }),
 );
 
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/health", (_req, res) => {
-    res.json({ success: true, message: "NextStep Road API is healthy", uptime: process.uptime() });
+  res.json({
+    success: true,
+    message: "NextStep Road API is healthy",
+    uptime: process.uptime(),
+  });
 });
-
+app.use("/api/incident-plan", incidentPlanRoutes);
 app.use(notFound);
 app.use(errorHandler);
-app.use("/api/incident-plan", incidentPlanRoutes);
 
 export default app;

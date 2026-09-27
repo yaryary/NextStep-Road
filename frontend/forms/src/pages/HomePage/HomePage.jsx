@@ -1,11 +1,21 @@
 import "./HomePage.css";
 import { assets } from "../../assets/assets.js";
 import { useNavigate } from "react-router-dom";
-
-
+import { useEffect } from "react";
 
 export default function HomePage({ incidentType, setIncidentType }) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedIncident = localStorage.getItem("nextStepIncident");
+    if (!savedIncident) {
+      // If storage was wiped by a "Start over" click, clear the selection
+      setIncidentType(null);
+    } else {
+      // If they refreshed the page, restore their previous selection
+      setIncidentType(savedIncident);
+    }
+  }, [setIncidentType]);
 
   function handleIncidentSelect(selectedType) {
     setIncidentType(selectedType);
@@ -188,6 +198,7 @@ export default function HomePage({ incidentType, setIncidentType }) {
             className="start-over-button"
             onClick={() => {
               setIncidentType(null);
+              localStorage.removeItem("nextStepIncident");
             }}
           >
             <span aria-hidden="true">‹</span>
@@ -200,7 +211,10 @@ export default function HomePage({ incidentType, setIncidentType }) {
             type="button"
             className="continue-button"
             disabled={!incidentType}
-            onClick={() => navigate("/questions")}
+            onClick={() => {
+              localStorage.setItem("nextStepIncident", incidentType);
+              navigate("/questions");
+            }}
           >
             Continue
           </button>

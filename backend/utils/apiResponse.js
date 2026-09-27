@@ -4,6 +4,6 @@ export function sendSuccess(res, {statusCode = 200, message= "OK", data = null, 
         success: true,
         message,
         data,
-        ...arguments(meta? { meta } : {}),
+        ...(meta? { meta } : {}),
     });
 }

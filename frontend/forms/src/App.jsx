@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage/HomePage.jsx";
 import QuestionsPage from "./pages/QuestionsPage/QuestionsPage.jsx";
 import { useState } from "react";
+import ResultsPage from "./pages/ResultsPage/ResultsPage.jsx";
 
 
 function NotFound() {
@@ -28,6 +29,10 @@ export default function App() {
       <Route
         path="/questions"
         element={<QuestionsPage incidentType={incidentType} />}
+      />
+      <Route
+        path="/results"
+        element={<ResultsPage incidentType={incidentType} />}
       />
       <Route path="*" element={<NotFound />} />
     </Routes>

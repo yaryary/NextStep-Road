@@ -1,19 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./QuestionsPage.css";
 import { incidentQuestions } from "../../data/incidentQuestions.js";
 import { incidentTypes } from "../../data/incidentTypes.js";
 import { assets } from "../../assets/assets.js";
+import { useNavigate } from "react-router-dom";
 
 export default function QuestionsPage({ incidentType }) {
-  const questions = incidentQuestions[incidentType] ?? [];
+  const navigate = useNavigate();
+
+  const activeIncidentType =
+    incidentType || localStorage.getItem("nextStepIncident");
+  const questions = incidentQuestions[activeIncidentType] ?? [];
+  const [piiWarning, setPiiWarning] = useState(false);
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState("");
 
   const selectedIncident = incidentTypes.find(
-    (incident) => incident.id === incidentType,
+    (incident) => incident.id === activeIncidentType,
   );
-  const [privacyConfirmed, setPrivacyConfirmed] = useState(false);
-  const [answers, setAnswers] = useState({});
-  const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  // Initialize state by checking localStorage first
+  const [privacyConfirmed, setPrivacyConfirmed] = useState(() => {
+    return localStorage.getItem("nextStepPrivacy") === "true";
+  });
+  const [additionalNotes, setAdditionalNotes] = useState(() => {
+    return localStorage.getItem("nextStepNotes") || "";
+  });
+  const [answers, setAnswers] = useState(() => {
+    const saved = localStorage.getItem("nextStepAnswers");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [activeQuestionIndex, setActiveQuestionIndex] = useState(() => {
+    const saved = localStorage.getItem("nextStepIndex");
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [showDangerWarning, setShowDangerWarning] = useState(false);
+
+  // Keep localStorage fully synced whenever the user updates these states
+  useEffect(() => {
+    localStorage.setItem("nextStepAnswers", JSON.stringify(answers));
+  }, [answers]);
+
+  useEffect(() => {
+    localStorage.setItem("nextStepNotes", additionalNotes);
+  }, [additionalNotes]);
+
+  useEffect(() => {
+    localStorage.setItem("nextStepIndex", activeQuestionIndex.toString());
+  }, [activeQuestionIndex]);
+
+  useEffect(() => {
+    localStorage.setItem("nextStepPrivacy", privacyConfirmed.toString());
+  }, [privacyConfirmed]);
 
   const allQuestionsAnswered =
     questions.length > 0 &&
@@ -43,11 +82,66 @@ export default function QuestionsPage({ incidentType }) {
   }
 
   function handleStartOver() {
-    setAnswers({});
-    setActiveQuestionIndex(0);
-    setShowDangerWarning(false);
-    setPrivacyConfirmed(false);
+    localStorage.removeItem("nextStepAnswers");
+    localStorage.removeItem("nextStepIndex");
+    localStorage.removeItem("nextStepPrivacy");
+    localStorage.removeItem("nextStepIncident");
+    localStorage.removeItem("nextStepNotes");
     window.scrollTo({ top: 0, behavior: "smooth" });
+    navigate("/");
+  }
+
+  async function handleSubmit() {
+    if (!canSubmit || isGenerating || !activeIncidentType) return;
+
+    setIsGenerating(true);
+    setGenerationError("");
+
+    try {
+      const response = await fetch("http://localhost:8000/api/incident-plan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          incidentType: activeIncidentType,
+          answers,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Could not create a plan.");
+      }
+
+      const plan = result.data?.plan;
+
+      if (!plan) {
+        throw new Error("The server did not return a plan.");
+      }
+
+      navigate("/results", {
+        state: { incidentType: activeIncidentType, answers, plan },
+      });
+    } catch (error) {
+      console.error("Plan generation failed:", error);
+      setGenerationError("We couldn't generate a plan right now.");
+    } finally {
+      setIsGenerating(false);
+    }
+  }
+  // This function checks the text locally as the user types
+  function handleNotesChange(event) {
+    const text = event.target.value;
+    setAdditionalNotes(text);
+
+    // Look for common PII patterns:
+    const looksLikeEmail = /[\w.-]+@[\w.-]+\.\w+/.test(text);
+    const looksLikeIdOrPhone = /(?:\d[\s\-.\(\)]*){7,}/.test(text);
+
+    // If it finds something, trigger the warning
+    setPiiWarning(looksLikeEmail || looksLikeIdOrPhone);
   }
 
   return (
@@ -152,6 +246,35 @@ export default function QuestionsPage({ incidentType }) {
               </fieldset>
             );
           })}
+          {allQuestionsAnswered && (
+            <fieldset className="question-card question-card--active additional-notes-card">
+              <legend className="question-title">
+                Anything else we should know? (Optional)
+              </legend>
+
+              <textarea
+                className="notes-textarea"
+                placeholder="e.g., It's raining heavily, or I have a dog in the car..."
+                value={additionalNotes}
+                onChange={handleNotesChange}
+                rows="3"
+              />
+
+              {/* Real-time Mindful AI Intervention */}
+              {piiWarning && (
+                <div className="pii-warning" role="alert">
+                  <span className="warning-icon" aria-hidden="true">
+                    ⚠
+                  </span>
+                  <span>
+                    <strong>Privacy check:</strong> It looks like you might have
+                    entered a phone number, ID, or email. For your safety,
+                    please remove personal details before generating your plan.
+                  </span>
+                </div>
+              )}
+            </fieldset>
+          )}
         </div>
         {allQuestionsAnswered && (
           <div className="privacy-notice">
@@ -208,11 +331,12 @@ export default function QuestionsPage({ incidentType }) {
           <button
             type="button"
             className="submit-button"
-            disabled={!canSubmit}
-            onClick={() => navigate("")}
+            disabled={!canSubmit || isGenerating || piiWarning}
+            onClick={handleSubmit}
           >
-            Submit
+            {isGenerating ? "Creating your plan…" : "Submit"}
           </button>
+          {generationError && <p role="alert">{generationError}</p>}
         </div>
       </div>
       {showDangerWarning && (
