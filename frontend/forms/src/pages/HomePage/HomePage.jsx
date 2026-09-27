@@ -2,43 +2,11 @@ import "./HomePage.css";
 import { assets } from "../../assets/assets.js";
 import { useNavigate } from "react-router-dom";
 
-const [incidentTypes] = [
-  {
-    id: "flat-tire",
-    title: "Flat tire",
-    description: "Need roadside help or a spare tire.",
-    icon: assets.flat_tire_icon,
-  },
-  {
-    id: "minor-accident",
-    title: "Minor accident",
-    description: "Need help after a low-impact collision.",
-    icon: assets.accident_icon,
-  },
-  {
-    id: "dead-battery",
-    title: "Dead battery",
-    description: "Need a jump-start or battery assistance.",
-    icon: assets.battery_icon,
-  },
-  {
-    id: "breakdown-warning-light",
-    title: "Breakdown or warning light",
-    description: "Your vehicle stopped or a warning light came on.",
-    icon: assets.light_icon,
-  },
-  {
-    id: "vehicle-break-in-or-theft",
-    title: "Vehicle break-in or theft",
-    description: "Your vehicle was damaged, broken into, or stolen.",
-    icon: assets.theft_icon,
-  },
-];
+
 
 export default function HomePage({ incidentType, setIncidentType }) {
-
   const navigate = useNavigate();
-  
+
   function handleIncidentSelect(selectedType) {
     setIncidentType(selectedType);
   }
@@ -172,7 +140,9 @@ export default function HomePage({ incidentType, setIncidentType }) {
             onClick={() => handleIncidentSelect("vehicle-break-in-or-theft")}
             aria-pressed={incidentType === "vehicle-break-in-or-theft"}
             className={`incident-card ${
-              incidentType === "vehicle-break-in-or-theft" ? "incident-card--selected" : ""
+              incidentType === "vehicle-break-in-or-theft"
+                ? "incident-card--selected"
+                : ""
             }`}
           >
             <span className="incident-icon" aria-hidden="true">
@@ -213,10 +183,13 @@ export default function HomePage({ incidentType, setIncidentType }) {
         </div>
 
         <div className="plan-navigation">
-          <button type="button" className="start-over-button"
-          onClick={() => {
-            setIncidentType(null);
-          }}>
+          <button
+            type="button"
+            className="start-over-button"
+            onClick={() => {
+              setIncidentType(null);
+            }}
+          >
             <span aria-hidden="true">‹</span>
             Start over
           </button>
