@@ -4,6 +4,7 @@ import { assets } from "../../assets/assets.js";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { incidentTypes } from "../../data/incidentTypes.js";
 import { incidentQuestions } from "../../data/incidentQuestions.js";
+import { clearSavedPlan } from "../../utils/storage.js";
 
 export default function ResultsPage() {
   const { state } = useLocation();
@@ -12,9 +13,10 @@ export default function ResultsPage() {
   const storedSession = JSON.parse(localStorage.getItem("nextStepSession"));
   const activeData = state?.plan ? state : storedSession;
 
-  const plan = state?.plan;
-  const incidentType = state?.incidentType;
-  const answers = state?.answers || {};
+  const plan = activeData?.plan;
+  const incidentType = activeData?.incidentType;
+  const answers = activeData?.answers || {};
+  const isFallback = activeData?.isFallback === true;
 
   // Load checklist progress from localStorage
   const [checkedItems, setCheckedItems] = useState(() => {
@@ -49,13 +51,7 @@ export default function ResultsPage() {
 
   // Clear everything when the user clicks "Start over"
   const handleStartOver = () => {
-    localStorage.removeItem("nextStepSession");
-    localStorage.removeItem("nextStepChecks");
-    localStorage.removeItem("nextStepAnswers");
-    localStorage.removeItem("nextStepIndex");
-    localStorage.removeItem("nextStepPrivacy");
-    localStorage.removeItem("nextStepIncident");
-    localStorage.removeItem("nextStepNotes");
+    clearSavedPlan();
     navigate("/");
   };
 
@@ -79,6 +75,12 @@ export default function ResultsPage() {
       <div className="plan">
         <div className="plan-top">
           <h1>{plan.title || "Your next-step plan"}</h1>
+          {isFallback && (
+            <p className="fallback-notice" role="status">
+              This is a general checklist because a personalized plan wasn't
+              available right now.
+            </p>
+          )}
           <span className="warning-wrapper">
             <span className="warning-icon" aria-hidden="true">
               <img src={assets.caution_icon} alt="" />

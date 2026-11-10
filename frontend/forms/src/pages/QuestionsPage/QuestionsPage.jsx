@@ -4,6 +4,8 @@ import { incidentQuestions } from "../../data/incidentQuestions.js";
 import { incidentTypes } from "../../data/incidentTypes.js";
 import { assets } from "../../assets/assets.js";
 import { useNavigate } from "react-router-dom";
+import { getFallbackPlan } from "../../data/fallbackPlans.js";
+import { clearSavedPlan } from "../../utils/storage.js";
 
 export default function QuestionsPage({ incidentType }) {
   const navigate = useNavigate();
@@ -82,11 +84,7 @@ export default function QuestionsPage({ incidentType }) {
   }
 
   function handleStartOver() {
-    localStorage.removeItem("nextStepAnswers");
-    localStorage.removeItem("nextStepIndex");
-    localStorage.removeItem("nextStepPrivacy");
-    localStorage.removeItem("nextStepIncident");
-    localStorage.removeItem("nextStepNotes");
+    clearSavedPlan();
     window.scrollTo({ top: 0, behavior: "smooth" });
     navigate("/");
   }
@@ -97,7 +95,11 @@ export default function QuestionsPage({ incidentType }) {
     setIsGenerating(true);
     setGenerationError("");
 
+    localStorage.removeItem("nextStepChecks");
+
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
       const response = await fetch("http://localhost:8000/api/incident-plan", {
         method: "POST",
         headers: {
@@ -107,7 +109,9 @@ export default function QuestionsPage({ incidentType }) {
           incidentType: activeIncidentType,
           answers,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       const result = await response.json();
 
@@ -126,7 +130,21 @@ export default function QuestionsPage({ incidentType }) {
       });
     } catch (error) {
       console.error("Plan generation failed:", error);
-      setGenerationError("We couldn't generate a plan right now.");
+
+      const fallbackPlan = getFallbackPlan(activeIncidentType, answers);
+
+      if (fallbackPlan) {
+        navigate("/results", {
+          state: {
+            incidentType: activeIncidentType,
+            answers,
+            plan: fallbackPlan,
+            isFallback: true,
+          },
+        });
+      } else {
+        setGenerationError("We couldn't generate a plan right now.");
+      }
     } finally {
       setIsGenerating(false);
     }

@@ -3,7 +3,7 @@ import { env } from "./config/env.js";
 
 function start() {
     app.listen(env.port, () => {
-        console.log(`Server running in ${env.nodeEnv} mode on hhtp://localhost:${env.port}`);
+        console.log(`Server running in ${env.nodeEnv} mode on http://localhost:${env.port}`);
     });
 }
 

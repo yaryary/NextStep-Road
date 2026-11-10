@@ -30,7 +30,6 @@ These choices reflect the challenges that interested me most at ShellHacks: maki
 | Backend  | Node.js, Express                        |
 | AI       | Google Gemini API                       |
 
-
 ## Project structure
 
 ```text
