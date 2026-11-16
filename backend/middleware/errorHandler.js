@@ -9,6 +9,17 @@ export function notFound(req, _res, next) {
 export function errorHandler(err, _req, res, _next) {
     let error = err;
 
+    if(err.type === "entity.too.large"){
+        return res.status(413).json({
+            success: false,
+            message: "Request is too large, please try again with a smaller load"
+        });
+    } else if (err.type === "entity.parse.failed"){
+        return res.status(400).json({
+            success: false,
+            message:"Invalid request format, please try again"
+        })
+    }
     if(error.name === "ValidationError") {
         const details = Object.values(error.errors).map((e) => e.message);
         error = ApiError.badRequest("Validation failed", details);
@@ -19,7 +30,7 @@ export function errorHandler(err, _req, res, _next) {
         error = ApiError.conflict(`${field} already exists`);
     } else if(!(error instanceof ApiError)) {
         error = ApiError.internal(error.message);
-    }
+    } 
 
     if(!isProd && error.statusCode >= 500) {
         console.error(err);

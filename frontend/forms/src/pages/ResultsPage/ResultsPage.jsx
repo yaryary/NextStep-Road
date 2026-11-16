@@ -5,6 +5,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import { incidentTypes } from "../../data/incidentTypes.js";
 import { incidentQuestions } from "../../data/incidentQuestions.js";
 import { clearSavedPlan } from "../../utils/storage.js";
+import { hasDangerNotice } from "../../data/dangerRules.js";
 
 export default function ResultsPage() {
   const { state } = useLocation();
@@ -17,6 +18,7 @@ export default function ResultsPage() {
   const incidentType = activeData?.incidentType;
   const answers = activeData?.answers || {};
   const isFallback = activeData?.isFallback === true;
+  const showDangerNotice = hasDangerNotice(incidentType, answers);
 
   // Load checklist progress from localStorage
   const [checkedItems, setCheckedItems] = useState(() => {
@@ -74,6 +76,13 @@ export default function ResultsPage() {
       </div>
       <div className="plan">
         <div className="plan-top">
+          {showDangerNotice && (
+            <div className="danger-banner" role="alert">
+              <strong>Safety first:</strong> If anyone is hurt, or you are in or
+              near moving traffic, move to a safe place if you can and call 911
+              before doing anything else on this list.
+            </div>
+          )}
           <h1>{plan.title || "Your next-step plan"}</h1>
           {isFallback && (
             <p className="fallback-notice" role="status">
@@ -81,14 +90,6 @@ export default function ResultsPage() {
               available right now.
             </p>
           )}
-          <span className="warning-wrapper">
-            <span className="warning-icon" aria-hidden="true">
-              <img src={assets.caution_icon} alt="" />
-            </span>
-            <span className="warning">
-              {plan.safetyNotice && <p role="alert">{plan.safetyNotice}</p>}
-            </span>
-          </span>
         </div>
         <div className="plan-content">
           <section className="checklist-section">

@@ -21,6 +21,26 @@
   border-radius: 8px;
 }
 
+.danger-banner {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+  margin: 16px auto 12px;
+  padding: 16px 20px;
+  background-color: #fdecec;
+  border: 1px solid #e3a8a8;
+  border-left: 8px solid #b42318;
+  border-radius: 12px;
+  color: #5c1410;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.danger-banner strong {
+  color: #b42318;
+  font-weight: 700;
+}
+
 .ResultsPage .warning-wrapper {
     display: flex;
     align-items: center;

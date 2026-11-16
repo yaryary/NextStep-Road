@@ -1,6 +1,8 @@
+import { ApiError } from "../utils/ApiError.js"
+import { isValidPlan } from "../validators/validateResponse.js";
 import { generateJson } from "./gemini.service.js";
 
-export async function generateIncidentPlan(answers) {
+export async function generateIncidentPlan(payload) {
   const schemaHint = `
 {
   "title": "string",
@@ -22,7 +24,7 @@ export async function generateIncidentPlan(answers) {
 You are a calm, grounded, and highly practical incident response guide. Your goal is to create a clear, actionable preparedness plan for a student who has just experienced a transportation incident.
 
 Use the user's specific answers below to tailor the plan:
-${JSON.stringify(answers, null, 2)}
+${JSON.stringify(payload, null, 2)}
 
 Instructions for Checklist Content:
 1. Provide 4 to 7 highly specific steps.
@@ -37,5 +39,10 @@ Strict Guardrails:
 - Keep the language practical, reassuring, and easy to scan.
 `;
 
-  return generateJson(prompt, { schemaHint });
+  const plan = await generateJson(prompt, { schemaHint });
+  if(isValidPlan(plan)){
+    return plan;
+  }else{
+    throw ApiError.internal("Could not create a plan right now")
+  }
 }
